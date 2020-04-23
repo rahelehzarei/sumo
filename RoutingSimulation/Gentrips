@@ -1,0 +1,12 @@
+#!/bin/bash
+
+for ((j=10 ; j <= 200 ; j = j+10 ));
+do
+	mkdir Trips$j
+	echo Trips$j
+	for ((i=1 ; i <= 100 ; i++ ));
+	do
+	  echo $i
+	  python randomTrips.py -n ./RoutingSim1.net.xml -o ./Trips$j/RoutingSim$i.rou.xml -e $j --route-file ./Trips$j/RoutingSimRoute$i.rou.xml --validate true
+        done
+done
