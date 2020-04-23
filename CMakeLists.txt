@@ -24,9 +24,10 @@ if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release")
 endif ()
 
-project(SUMO)
 set(PACKAGE_VERSION "git")
 cmake_minimum_required(VERSION 3.1)
+project(SUMO)
+
 
 set(CMAKE_COLOR_MAKEFILE ON)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/build/cmake_modules/")
@@ -351,7 +352,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 set(commonlibs
         utils_distribution utils_shapes utils_options
-        utils_xml utils_geom utils_common utils_importio utils_iodevices utils_traction_wire foreign_tcpip
+        utils_xml utils_geom utils_common utils_importio utils_iodevices utils_traction_wire foreign_tcpip RoutingKitdll
         ${XercesC_LIBRARIES} ${ZLIB_LIBRARIES} ${PROJ_LIBRARY})
 if (MSVC)
     set(commonlibs ${commonlibs} ws2_32)
