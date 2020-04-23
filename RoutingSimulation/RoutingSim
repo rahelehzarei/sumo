@@ -1,0 +1,15 @@
+#!/bin/bash
+
+mkdir RoutingSim$1
+for ((j=10 ; j<=200; j=j+10 ));
+do
+	for ((i=1; i<=100; i++));
+	do
+	echo $i
+	sumo --routing-algorithm  $1 -n RoutingSim1.net.xml -r ./Trips$j/RoutingSim$i.rou.xml --tripinfo-output ./RoutingSim$1/Trips$j-tripinfo$i.xml --vehroute-output ./RoutingSim$1/Trips$j-vehroute$i.xml  --vehroute-output.cost true  --vehroute-output.route-length true  --duration-log.statistics true  --log ./RoutingSim$1/Trips$j-log$i.txt > ./RoutingSim$1/Trips$1-ouput$i.txt
+	python ./networkStatistics.py -t ./RoutingSim$1/Trips$j-tripinfo$i.xml -o ./RoutingSim$1/Trips$j-statistics$i
+	done
+
+#write statistics data of all the graphs in one file
+	python ./concatStatFiles.py $1 '0' Trips$j
+done

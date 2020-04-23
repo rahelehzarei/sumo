@@ -1,0 +1,10 @@
+#!/bin/bash
+
+for ((i=1; i<=10; i++ ));
+do
+	echo $i
+	netgenerate --rand true --random true --no-warnings true  -o RoutingSim$i.net.xml --rand.iterations=$1
+done
+
+
+
