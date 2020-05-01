@@ -1,23 +1,5 @@
 /****************************************************************************/
-// Eclipse SUMO, Simulation of Urban MObility; see https://eclipse.org/sumo
-// Copyright (C) 2001-2020 German Aerospace Center (DLR) and others.
-// This program and the accompanying materials are made available under the
-// terms of the Eclipse Public License 2.0 which is available at
-// https://www.eclipse.org/legal/epl-2.0/
-// This Source Code may also be made available under the following Secondary
-// Licenses when the conditions for such availability set forth in the Eclipse
-// Public License 2.0 are satisfied: GNU General Public License, version 2
-// or later which is available at
-// https://www.gnu.org/licenses/old-licenses/gpl-2.0-standalone.html
-// SPDX-License-Identifier: EPL-2.0 OR GPL-2.0-or-later
-/****************************************************************************/
-/// @file    CHRouter.h
-/// @author  Jakob Erdmann
-/// @author  Laura Bieker
-/// @author  Michael Behrisch
-/// @date    February 2012
-///
-// Shortest Path search using a Contraction Hierarchy
+/*Routing using CCH*/
 /****************************************************************************/
 #pragma once
 #include <config.h>
@@ -31,6 +13,7 @@
 #include <iterator>
 #include <map>
 #include <deque>
+#include <string>
 #include <utils/common/SysUtils.h>
 #include <utils/common/MsgHandler.h>
 #include <utils/common/StdDefs.h>
@@ -50,7 +33,7 @@ class MSEdge;
 // ===========================================================================
 /**
  * @class CHRouter
- * @brief Computes the shortest path through a contracted network
+ * @brief Computes the shortest path through a customizable contraction hierarchy
  *
  * The template parameters are:
  * @param E The edge class to use (MSEdge/ROEdge)
@@ -65,158 +48,6 @@ template<class E, class V>
 class CCHRouter : public SUMOAbstractRouter<E, V> {
 
 public:
-	/// A meeting point of the two search scopes
-	//typedef std::pair<const typename SUMOAbstractRouter<E, V>::EdgeInfo*, const typename SUMOAbstractRouter<E, V>::EdgeInfo*> Meeting;
-
-	/**
-	 * @class Unidirectional
-	 * class for searching in one direction
-	 */
-//	class Unidirectional {
-//	public:
-//		/// @brief Constructor
-//		Unidirectional(const std::vector<E*>& edges, bool forward) :
-//			myAmForward(forward),
-//			myVehicle(0) {
-//			for (const E* const e : edges) {
-//				myEdgeInfos.push_back(typename SUMOAbstractRouter<E, V>::EdgeInfo(e));
-//			}
-//		}
-//
-//		inline bool found(const E* const edge) const {
-//			return myFound.count(edge) > 0;
-//		}
-//
-//		inline typename SUMOAbstractRouter<E, V>::EdgeInfo* getEdgeInfo(const E* const edge) {
-//			return &(myEdgeInfos[edge->getNumericalID()]);
-//		}
-//
-//		inline const typename SUMOAbstractRouter<E, V>::EdgeInfo* getEdgeInfo(const E* const edge) const {
-//			return &(myEdgeInfos[edge->getNumericalID()]);
-//		}
-//
-//		/**
-//		 * @class EdgeInfoByEffortComparator
-//		 * Class to compare (and so sort) nodes by their effort
-//		 */
-//		class EdgeInfoByTTComparator {
-//		public:
-//			/// Comparing method
-//			bool operator()(const typename SUMOAbstractRouter<E, V>::EdgeInfo* nod1, const typename SUMOAbstractRouter<E, V>::EdgeInfo* nod2) const {
-//				if (nod1->effort == nod2->effort) {
-//					return nod1->edge->getNumericalID() > nod2->edge->getNumericalID();
-//				}
-//				return nod1->effort > nod2->effort;
-//			}
-//		};
-//
-//
-//		void init(const E* const start, const V* const vehicle) {
-//			assert(vehicle != 0);
-//			// all EdgeInfos touched in the previous query are either in myFrontier or myFound: clean those up
-//			for (auto ei : myFrontier) {
-//				ei->reset();
-//			}
-//			myFrontier.clear();
-//			for (auto edge : myFound) {
-//				getEdgeInfo(edge)->reset();
-//			}
-//			myFound.clear();
-//			myVehicle = vehicle;
-//			auto startInfo = getEdgeInfo(start);
-//			startInfo->effort = 0.;
-//			startInfo->prev = nullptr;
-//			myFrontier.push_back(startInfo);
-//		}
-//
-//
-//		typedef std::vector<typename CHBuilder<E, V>::Connection> ConnectionVector;
-//		/** @brief explore on element from the frontier,update minTTSeen and meeting
-//		 * if an EdgeInfo found by the otherSearch is encountered
-//		 * returns whether stepping should continue
-//		 */
-//		bool step(const std::vector<ConnectionVector>& uplinks, const Unidirectional& otherSearch, double& minTTSeen, Meeting& meeting) {
-//			// pop the node with the minimal length
-//			auto* const minimumInfo = myFrontier.front();
-//			std::pop_heap(myFrontier.begin(), myFrontier.end(), myComparator);
-//			myFrontier.pop_back();
-//			// check for a meeting with the other search
-//			const E* const minEdge = minimumInfo->edge;
-//#ifdef CHRouter_DEBUG_QUERY
-//			std::cout << "DEBUG: " << (myAmForward ? "Forward" : "Backward") << " hit '" << minEdge->getID() << "' Q: ";
-//			for (typename std::vector<EdgeInfo*>::iterator it = myFrontier.begin(); it != myFrontier.end(); it++) {
-//				std::cout << (*it)->traveltime << "," << (*it)->edge->getID() << " ";
-//			}
-//			std::cout << "\n";
-//#endif
-//			if (otherSearch.found(minEdge)) {
-//				const auto* const otherInfo = otherSearch.getEdgeInfo(minEdge);
-//				const double ttSeen = minimumInfo->effort + otherInfo->effort;
-//#ifdef CHRouter_DEBUG_QUERY
-//				std::cout << "DEBUG: " << (myAmForward ? "Forward" : "Backward") << "-Search hit other search at '" << minEdge->getID() << "', tt: " << ttSeen << " \n";
-//#endif
-//				if (ttSeen < minTTSeen) {
-//					minTTSeen = ttSeen;
-//					if (myAmForward) {
-//						meeting.first = minimumInfo;
-//						meeting.second = otherInfo;
-//					}
-//					else {
-//						meeting.first = otherInfo;
-//						meeting.second = minimumInfo;
-//					}
-//				}
-//			}
-//			// prepare next steps
-//			minimumInfo->visited = true;
-//			// XXX we only need to keep found elements if they have a higher rank than the lowest rank in the other search queue
-//			myFound.insert(minimumInfo->edge);
-//			for (const auto& uplink : uplinks[minEdge->getNumericalID()]) {
-//				const auto upwardInfo = &myEdgeInfos[uplink.target];
-//				const double effort = minimumInfo->effort + uplink.cost;
-//				const SUMOVehicleClass svc = myVehicle->getVClass();
-//				// check whether it can be used
-//				if ((uplink.permissions & svc) != svc) {
-//					continue;
-//				}
-//				const double oldEffort = upwardInfo->effort;
-//				if (!upwardInfo->visited && effort < oldEffort) {
-//					upwardInfo->effort = effort;
-//					upwardInfo->prev = minimumInfo;
-//					if (oldEffort == std::numeric_limits<double>::max()) {
-//						myFrontier.push_back(upwardInfo);
-//						std::push_heap(myFrontier.begin(), myFrontier.end(), myComparator);
-//					}
-//					else {
-//						std::push_heap(myFrontier.begin(),
-//							std::find(myFrontier.begin(), myFrontier.end(), upwardInfo) + 1,
-//							myComparator);
-//					}
-//				}
-//			}
-//			// @note: this effectively does a full dijkstra search.
-//			// the effort compared to the naive stopping criterion is thus
-//			// quadrupled. We could implement a better stopping criterion (Holte)
-//			// However since the search shall take place in a contracted graph
-//			// it probably does not matter
-//			return !myFrontier.empty() && myFrontier.front()->effort < minTTSeen;
-//		}
-//
-//	private:
-//		/// @brief the role of this search
-//		bool myAmForward;
-//		/// @brief the min edge heap
-//		std::vector<typename SUMOAbstractRouter<E, V>::EdgeInfo*> myFrontier;
-//		/// @brief the set of visited (settled) Edges
-//		std::set<const E*> myFound;
-//		/// @brief The container of edge information
-//		std::vector<typename SUMOAbstractRouter<E, V>::EdgeInfo> myEdgeInfos;
-//
-//		EdgeInfoByTTComparator myComparator;
-//
-//		const V* myVehicle;
-//
-//	};
 
 	/** @brief Constructor
 	 * @param[in] validatePermissions Whether a multi-permission hierarchy shall be built
@@ -238,49 +69,54 @@ public:
 		unsigned i = 0;
 		std::set<float> lat;
 		std::set<float> lon;
-		std::set<std::map<int, unsigned>> junc;
 		for (const MSEdge* edge : myEdges)
 		{
-
-		/*	if (junc.find(std::stoi(edge->getFromJunction()->getID())) == junc.end())
+			//if (Juncval.find(std::stoi(edge->getToJunction()->getID())) == Juncval.end())
+			if (Juncval.find(edge->getFromJunction()->getID()) == Juncval.end())
 			{
-				junc.insert(std::make_pair(std::stoi(edge->getFromJunction.getID()), i));
-			}*/
-
-			
-			if (Juncval.find(std::stoi(edge->getToJunction()->getID())) == Juncval.end())
+				
+				//Juncval.insert(std::make_pair(std::stoi(edge->getFromJunction()->getID()), i));
+				//Juncval.insert(std::make_pair(edge->getFromJunction()->getID(), i));
+			//add from and to nodes of edge to Juncval and assign them a unique id
+				Juncval.insert(std::make_pair(edge->getFromJunction()->getID(), i++));
+				//i++;
+			}
+			if (Juncval.find(edge->getToJunction()->getID()) == Juncval.end())
 			{
-				Juncval.insert(std::make_pair(std::stoi(edge->getFromJunction()->getID()), i));
-				i++;
-				/*Juncval.insert(std::make_pair(std::stoi(edge->getToJunction()->getID()), i));
-				i++;*/
+				Juncval.insert(std::make_pair(edge->getToJunction()->getID(), i++));
+				//i++;
 			}
 
-			lat.insert((float)edge->getFromJunction()->getPosition().x());
-			lon.insert((float)edge->getFromJunction()->getPosition().y());
-			lat.insert((float)edge->getToJunction()->getPosition().x());
-			lon.insert((float)edge->getToJunction()->getPosition().y());
+				lat.insert((float)edge->getFromJunction()->getPosition().x());
+				lon.insert((float)edge->getFromJunction()->getPosition().y());
+				lat.insert((float)edge->getToJunction()->getPosition().x());
+				lon.insert((float)edge->getToJunction()->getPosition().y());
 
-
-		}
+			}
+		//}
 		for (const E* edge : myEdges)
 		{
 			if (edge->isNormal())
 			{
-				nodeEdgeMap.insert(std::make_pair(std::make_pair(Juncval[std::stoi(edge->getFromJunction()->getID())], Juncval[std::stoi(edge->getToJunction()->getID())]), edge));
+				//nodeEdgeMap.insert(std::make_pair(std::make_pair(Juncval[std::stoi(edge->getFromJunction()->getID())], Juncval[std::stoi(edge->getToJunction()->getID())]), edge));
+				nodeEdgeMap.insert(std::make_pair(std::make_pair(Juncval[edge->getFromJunction()->getID()], Juncval[edge->getToJunction()->getID()]), edge));
 			}
 		}
 
-		for (const MSEdge* edge : myEdges)
+		for (const E* edge : myEdges)
 		{
-			mytail.push_back(Juncval[std::stoi(edge->getFromJunction()->getID())]);
-			myhead.push_back(Juncval[std::stoi(edge->getToJunction()->getID())]);
+			//mytail.push_back(Juncval[std::stoi(edge->getFromJunction()->getID())]);
+			//myhead.push_back(Juncval[std::stoi(edge->getToJunction()->getID())]);
+			mytail.push_back(Juncval[edge->getFromJunction()->getID()]);
+			myhead.push_back(Juncval[edge->getToJunction()->getID()]);
+			//}
 		}
 
 		std::copy(lat.begin(), lat.end(), std::back_inserter(mylat));
 		std::copy(lon.begin(), lon.end(), std::back_inserter(mylon));
 
 		node_count = Juncval.size();
+		//node_count = mytail.size();
 		//if (myHierarchyBuilder)
 		myOrder = compute_nested_node_dissection_order_using_inertial_flow(node_count, mytail, myhead, mylat, mylon);
 		myHierarchyBuilder = new CustomizableContractionHierarchy(myOrder, mytail, myhead);
@@ -335,45 +171,6 @@ public:
 			while (msTime >= myValidUntil) {
 				myValidUntil += myWeightPeriod;
 			}
-			/*delete myHierarchy;
-			myHierarchy = myHierarchyBuilder->buildContractionHierarchy(myValidUntil - myWeightPeriod, vehicle, this);*/
-
-			//filing head and tail and latitude and longitute
-			//unsigned i = 0;
-			//std::set<float> lat;
-			//std::set<float> lon;
-			//for (const MSEdge* edge : myEdges)
-			//{
-
-			//	Juncval.insert(std::make_pair(std::stoi(edge->getFromJunction()->getID()), i));
-			//	i++;
-			//	if (Juncval.find(std::stoi(edge->getToJunction()->getID())) == Juncval.end())
-			//	{
-			//		Juncval.insert(std::make_pair(std::stoi(edge->getToJunction()->getID()), i));
-			//			i++;
-			//	}
-
-			//		lat.insert((float)edge->getFromJunction()->getPosition().x());
-			//		lat.insert((float)edge->getFromJunction()->getPosition().y());
-			//		lon.insert((float)edge->getToJunction()->getPosition().x());
-			//		lon.insert((float)edge->getToJunction()->getPosition().y());
-
-
-			//}
-
-			//for (const MSEdge* edge : myEdges)
-			//{
-			//	mytail.push_back(Juncval[std::stoi(edge->getFromJunction()->getID())]);
-			//	myhead.push_back(Juncval[std::stoi(edge->getToJunction()->getID())]);
-			//}
-
-			//std::copy(lat.begin(), lat.end(), mylat.begin());
-			//std::copy(lon.begin(), lon.end(), mylon.begin());
-
-			//node_count = Juncval.size();
-			//if (myHierarchyBuilder)
-			//myOrder = compute_nested_node_dissection_order_using_inertial_flow(node_count, mytail, myhead, mylat, mylon);
-			//myHierarchyBuilder = new CustomizableContractionHierarchy(myOrder, mytail, myhead);
 
 			if (myMetric == nullptr)
 			{
@@ -385,72 +182,38 @@ public:
 			else
 			{
 				setcurrent_weight();
-					myMetric->reset(*myHierarchyBuilder, current_weight);
+				myMetric->reset(*myHierarchyBuilder, current_weight);
 			}
 
 
 			// ready for routing
 			this->startQuery();
 			CustomizableContractionHierarchyQuery query = CustomizableContractionHierarchyQuery(*myMetric);
-			unsigned source = Juncval[std::stoi(from->getFromJunction()->getID())];
-			unsigned target = Juncval[std::stoi(to->getToJunction()->getID())];
+			//unsigned source = Juncval[std::stoi(from->getFromJunction()->getID())];
+			unsigned source = Juncval[from->getToJunction()->getID()];
+			//unsigned target = Juncval[std::stoi(to->getToJunction()->getID())];
+			unsigned target = Juncval[to->getFromJunction()->getID()];
 			query.reset().add_source(source).add_target(target).run().get_distance();
+			auto visited_nodes = query.number_of_visited_nodes();
+			auto arcpath = query.get_arc_path();
 			auto path = query.get_node_path();
+
 			//normalEdges = myEdges[isnormal() == true];
-			for (int i=0; i < path.size() - 1  ; i++)
+			for (int i = 0; i < path.size() - 1; i++)
 			{
 				into.push_back(nodeEdgeMap[std::make_pair(path[i], path[i + 1])]);
 			}
 
-
-		/*	for (const MSEdge* edge : normalEdges) {
-				if Juncval[std::stoi(edge->getFromFunction()->getID())]==
-			}*/
-
-			//auto path = query.get_arc_path();
-
-			//convert_node_path_to_arc_path(myHierarchyBuilder->up_first_out, myhead, path);
-			//into = path;
-			//find the original edge in network using nodes converted IDs
-			//myEdges[]
+			into.push_back(to);
+			auto it = into.begin();
+			into.insert(it, from);
 			auto result = true;
-			//return true;
-			/*myForwardSearch.init(from, vehicle);
-			myBackwardSearch.init(to, vehicle);
-			double minTTSeen = std::numeric_limits<double>::max();
-			Meeting meeting(nullptr, nullptr);
-			bool continueForward = true;
-			bool continueBackward = true;
-			int num_visited_fw = 0;
-			int num_visited_bw = 0;
-			bool result = true;
-			while (continueForward || continueBackward) {
-				if (continueForward) {
-					continueFoxrward = myForwardSearch.step(myHierarchy->forwardUplinks, myBackwardSearch, minTTSeen, meeting);
-					num_visited_fw += 1;
-				}
-				if (continueBackward) {
-					continueBackward = myBackwardSearch.step(myHierarchy->backwardUplinks, myForwardSearch, minTTSeen, meeting);
-					num_visited_bw += 1;
-				}
-			}
-			if (minTTSeen < std::numeric_limits<double>::max()) {
-				buildPathFromMeeting(meeting, into);
-			}
-			else {
-				if (!silent) {
-					this->myErrorMsgHandler->informf("No connection between edge '%' and edge '%' found.", from->getID(), to->getID());
-				}
-				result = false;
-			}
-	#ifdef CHRouter_DEBUG_QUERY_PERF
-			std::cout << "visited " << num_visited_fw + num_visited_bw << " edges (" << num_visited_fw << "," << num_visited_bw << ") ,final path length: " + toString(into.size()) + ")\n";
-	#endif*/
-	//this->endQuery(num_visited_bw + num_visited_fw);
+
+			this->endQuery(visited_nodes);
 			return result;
 		}
 	}
-	
+
 
 	/// normal routing methods
 
@@ -511,7 +274,7 @@ public:
 		current_weight.clear();
 		for (const MSEdge * edge : myEdges)
 		{
-			current_weight.push_back(edge->getCurrentTravelTime());   // (edge, vehicle, time);
+			current_weight.push_back(edge->getCurrentTravelTime());
 		}
 	}
 
@@ -538,11 +301,13 @@ private:
 	const V* myVehicle;
 
 
-	CustomizableContractionHierarchy* myHierarchyBuilder ;
+	CustomizableContractionHierarchy* myHierarchyBuilder;
 	CustomizableContractionHierarchyMetric* myMetric;
 	std::vector<unsigned> current_weight;
-	std::map<unsigned, unsigned> Juncval;
-	std::map<std::pair<unsigned, unsigned> , const E*> nodeEdgeMap;
+	//std::map<unsigned, unsigned> Juncval;
+	std::map<std::string, unsigned> Juncval;
+	//std::map<std::pair<unsigned, unsigned>, const E*> nodeEdgeMap;
+	std::map<std::pair<unsigned, unsigned>, const E*> nodeEdgeMap;
 	std::vector<unsigned>myOrder;
 	std::vector<unsigned> mytail;
 	std::vector<unsigned> myhead;
