@@ -49,32 +49,34 @@ public:
 		myMetric(nullptr),
 		myWeightPeriod(weightPeriod),
 		myValidUntil(0),
-		mySVC(svc) {
+		mySVC(SVC_PASSENGER) {
 		/*define map between sumo node ID and CCH node ID (which is between 0 to number of nodes -1),
 		tail and head of all the edges (adjacency array), latitute and longitute of each node*/
 		unsigned i = 0;
-		std::set<float> lat;
-		std::set<float> lon;
-		std::copy_if(myEdges.begin(), myEdges.end(),  std::back_inserter(hasFromToNode) , [](const E* e) {return (e->getFromJunction() != nullptr && e->getToJunction() != nullptr); });
-		//std::remove_if(myEdges.begin(), myEdges.end(), [](const E* e) {return (e->getFromJunction() == nullptr && e->getToJunction() == nullptr); });
+		std::vector<float> lat;
+		std::vector<float> lon;
+		std::map<std::string, SVCPermissions> perm;
+		for (const E* edge : myEdges) {
+			if (edge->isNormal() || edge->isInternal()) {
+				perm.insert(std::make_pair(edge->getEdgeType(), edge->getPermissions()));
+			}
+		}
+		//std::copy_if(myEdges.begin(), myEdges.end(),  std::back_inserter(hasFromToNode) , [](const E* e) {return (e->getFromJunction() != nullptr && e->getToJunction() != nullptr); });
+		//std::copy_if(myEdges.begin(), myEdges.end(), std::back_inserter(hasFromToNode), [](const E* e) {return ((e->isNormal() || e->isInternal()) && (e->getEdgeType() == "highway.tertiary"||e->getEdgeType()=="highway.path" ||e->getEdgeType() == "highway.secondary" || e->getEdgeType() == "highway.secondary_link" || e->getEdgeType() == "highway.primary" || e->getEdgeType() == "highway.primary_link" ||e->getEdgeType() =="highway.motorway" || e->getEdgeType() == "highway.motorway_link" || e->getEdgeType() == "highway.residential")); });  //&& (e->getPermissions()==50593791 || e->getPermissions() == 50593791 || e->getPermissions() == 50495455 || e->getPermissions() == NULL)
+		std::copy_if(myEdges.begin(), myEdges.end(), std::back_inserter(hasFromToNode), [](const E* e) {return (e->isNormal() || e->isInternal()); });
+		//std::copy_if(myEdges.begin(), myEdges.end(), std::back_inserter(hasFromToNode), [](const E* e) {return (e->getFromJunction() != nullptr && e->getToJunction() != nullptr); });
 
 		/*creates a map between SUMO junction IDs and node IDs in CCH in edge-to-edge routing (from 0 to number of nodes -1)*/
 		for (const E* edge : hasFromToNode) {
 			if (Juncval.find(edge->getFromJunction()->getID()) == Juncval.end()) {
 				Juncval.insert(std::make_pair(edge->getFromJunction()->getID(), i++));
 			} if (Juncval.find(edge->getToJunction()->getID()) == Juncval.end()) {
-				Juncval.insert(std::make_pair(edge->getToJunction()->getID(), i++));
-			}
-			lat.insert((float)edge->getFromJunction()->getPosition().x());
-			lon.insert((float)edge->getFromJunction()->getPosition().y());
-			lat.insert((float)edge->getToJunction()->getPosition().x());
-			lon.insert((float)edge->getToJunction()->getPosition().y());
+				Juncval.insert(std::make_pair(edge->getToJunction()->getID(), i++));}
+			lat.push_back((float)edge->getFromJunction()->getPosition().x());
+			lon.push_back((float)edge->getFromJunction()->getPosition().y());
+			lat.push_back((float)edge->getToJunction()->getPosition().x());
+			lon.push_back((float)edge->getToJunction()->getPosition().y());
 		}
-
-		/*creates a map between SUMO junction IDs and node IDs in CCH in noed-to-node routing (from 0 to number of nodes -1)*/
-	/*	for (const E* edge : myEdges) {
-
-		}*/
 
 		for (const E* edge : hasFromToNode) {
 			if (edge->isNormal()) {
@@ -190,8 +192,42 @@ public:
 				auto it = into.begin();
 				into.insert(it, from);
 			}
-			auto result = true;
-			return result;
+
+	//for real city map
+	//check if all the sequence of edges in the path are in the list of successors of previous their edge
+	//if not, fix the route
+	//auto tmpinto(into);
+	//const E* edgeToInsert;
+	//const SUMOVehicleClass vClass = vehicle == nullptr ? SVC_IGNORING : vehicle->getVClass();
+	//for (int i = 0; i < tmpinto.size()-1; i++) {
+	//	std::vector<const E*> followerInfo;
+	//	followerInfo.clear();
+	//	for (const std::pair<const E*, const E*>& follower : tmpinto[i]->getViaSuccessors(vClass)) {
+	//		followerInfo.push_back(follower.first);
+	//	}
+	//	//if next edge in into list is not in the successor list of current edge, pick another edge and insert it in into vector
+	//	auto minEffort = INFINITY;
+	//	if (std::find(followerInfo.begin(), followerInfo.end(), tmpinto[i+1]) == followerInfo.end()) {
+	//		for (const E* f : followerInfo) {
+	//			if (f->prohibits(vehicle) || f->isTazConnector()) {
+	//				continue;
+	//			}
+	//			auto oldEffort = getEffort(tmpinto[i], nullptr, STEPS2TIME(msTime));
+	//			auto myCurrentEffort = oldEffort + getEffort(f, nullptr, STEPS2TIME(msTime));
+	//			if (myCurrentEffort < minEffort) {
+	//				minEffort = myCurrentEffort;
+	//				edgeToInsert = f;
+	//			}
+	//			else { continue; }
+
+	//		}
+	//		tmpinto.insert(std::find (tmpinto.begin(), tmpinto.end(), tmpinto[i+1]), edgeToInsert);
+	//	}
+
+	//}
+	//into =tmpinto;
+	auto result = true;
+	return result;
 		
 	}
 
@@ -220,7 +256,7 @@ private:
 	SUMOTime myValidUntil;
 
 	/// @brief the permissions for which the hierarchy was constructed
-	const SUMOVehicleClass mySVC;
+	const SUMOVehicleClass mySVC = SVC_PASSENGER;
 
 	const V* myVehicle;
 
