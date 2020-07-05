@@ -1,0 +1,17 @@
+#!/bin/bash
+
+mkdir RoutingSimDistance
+for ((j = 200 ; j<=200; j =j+50 ));
+	do
+		echo $j
+		for ((i=1; i<=1; i++));
+		 do
+		  echo $i
+			../../../../SUMOProj/bin/sumo_w.exe --routing-algorithm  CCH -n ./Montreal_big.net.xml -r ./Tripsd$j/RoutingSim$i.rou.xml --junction-taz true --device.rerouting.adaptation-interval 1000000 --tripinfo-output ./RoutingSimDistance/Trips$j-tripinfo-CCHw$i.xml --vehroute-output ./RoutingSimDistance/Trips$j-vehroute-CCHw$i.xml  --vehroute-output.cost true  --vehroute-output.route-length true  --duration-log.statistics true --xml-validation never --verbose true --device.rerouting.probability 1  --log ./RoutingSimDistance/Trips$j-log-CCHw$i.txt
+			../../../../SUMOProj/bin/sumo+w.exe --routing-algorithm  CCH -n ./Montreal_big.net.xml -r ./Tripsd$j/RoutingSim$i.rou.xml --junction-taz true --device.rerouting.adaptation-interval 1000000 --tripinfo-output ./RoutingSimDistance/Trips$j-tripinfo-CCH+w$i.xml --vehroute-output ./RoutingSimDistance/Trips$j-vehroute-CCH+w$i.xml  --vehroute-output.cost true  --vehroute-output.route-length true  --duration-log.statistics true --xml-validation never --verbose true --device.rerouting.probability 1  --log ./RoutingSimDistance/Trips$j-log-CCH+w$i.txt
+			../../../../SUMOProj/bin/sumo_RCH.exe --routing-algorithm  CCH -n ./Montreal_big.net.xml -r ./Tripsd$j/RoutingSim$i.rou.xml --junction-taz true --device.rerouting.adaptation-interval 1000000 --tripinfo-output ./RoutingSimDistance/Trips$j-tripinfo-CCH_RCH$i.xml --vehroute-output ./RoutingSimDistance/Trips$j-vehroute-CCH_RCH$i.xml  --vehroute-output.cost true  --vehroute-output.route-length true  --duration-log.statistics true --xml-validation never --verbose true --device.rerouting.probability 1  --log ./RoutingSimDistance/Trips$j-log-CCH_RCH$i.txt
+			../../../../SUMOProj/bin/sumo+w.exe --routing-algorithm  CH -n ./Montreal_big.net.xml -r ./Tripsd$j/RoutingSim$i.rou.xml --junction-taz true --device.rerouting.adaptation-interval 1000000 --tripinfo-output ./RoutingSimDistance/Trips$j-tripinfo-CH$i.xml --vehroute-output ./RoutingSimDistance/Trips$j-vehroute-CH$i.xml  --vehroute-output.cost true  --vehroute-output.route-length true  --duration-log.statistics true --xml-validation never --verbose true --device.rerouting.probability 1  --log ./RoutingSimDistance/Trips$j-log-CH$i.txt
+			../../../../SUMOProj/bin/sumo+w.exe --routing-algorithm  dijkstra -n ./Montreal_big.net.xml -r ./Tripsd$j/RoutingSim$i.rou.xml --junction-taz true --device.rerouting.adaptation-interval 1000000 --tripinfo-output ./RoutingSimDistance/Trips$j-tripinfo-dijkstra$i.xml --vehroute-output ./RoutingSimDistance/Trips$j-vehroute-dijkstra$i.xml  --vehroute-output.cost true  --vehroute-output.route-length true  --duration-log.statistics true --xml-validation never --verbose true --device.rerouting.probability 1  --log ./RoutingSimDistance/Trips$j-log-dijkstra$i.txt
+			../../../../SUMOProj/bin/sumo+w.exe --routing-algorithm  astar -n ./Montreal_big.net.xml -r ./Tripsd$j/RoutingSim$i.rou.xml --junction-taz true --device.rerouting.adaptation-interval 1000000 --tripinfo-output ./RoutingSimDistance/Trips$j-tripinfo-astar$i.xml --vehroute-output ./RoutingSimDistance/Trips$j-vehroute-astar$i.xml  --vehroute-output.cost true  --vehroute-output.route-length true  --duration-log.statistics true --xml-validation never --verbose true --device.rerouting.probability 1  --log ./RoutingSimDistance/Trips$j-log-astar$i.txt
+		 done
+	done
