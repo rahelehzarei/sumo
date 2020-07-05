@@ -5,7 +5,11 @@
 #include "id_set_queue.h"
 #include "bit_vector.h"
 #include "id_mapper.h"
-
+#include "contraction_hierarchy.h"
+#include <utils/common/SysUtils.h>
+#include <utils/common/ToString.h>
+#include <utils/common/MsgHandler.h>
+#include <utils/common/StdDefs.h>
 #include <vector>
 #include <string>
 #include <functional>
@@ -66,24 +70,24 @@ struct CustomizableContractionHierarchy{
 
 struct CustomizableContractionHierarchyMetric{
 	CustomizableContractionHierarchyMetric(){}
-	CustomizableContractionHierarchyMetric(const CustomizableContractionHierarchy&cch, const unsigned*input_weight);
-	CustomizableContractionHierarchyMetric(const CustomizableContractionHierarchy&cch, const std::vector<unsigned>&input_weight);
+	CustomizableContractionHierarchyMetric(const CustomizableContractionHierarchy&cch, const double*input_weight);
+	CustomizableContractionHierarchyMetric(const CustomizableContractionHierarchy&cch, const std::vector<double>&input_weight);
 
-	CustomizableContractionHierarchyMetric& reset(const CustomizableContractionHierarchy&cch, const unsigned*input_weight);
-	CustomizableContractionHierarchyMetric& reset(const CustomizableContractionHierarchy&cch, const std::vector<unsigned>&input_weight);
+	CustomizableContractionHierarchyMetric& reset(const CustomizableContractionHierarchy&cch, const double*input_weight);
+	CustomizableContractionHierarchyMetric& reset(const CustomizableContractionHierarchy&cch, const std::vector<double>&input_weight);
 
-	CustomizableContractionHierarchyMetric& reset(const unsigned*input_weight);
-	CustomizableContractionHierarchyMetric& reset(const std::vector<unsigned>&input_weight);
+	CustomizableContractionHierarchyMetric& reset(const double*input_weight);
+	CustomizableContractionHierarchyMetric& reset(const std::vector<double>&input_weight);
 
 	CustomizableContractionHierarchyMetric& customize();
 
 	ContractionHierarchy build_contraction_hierarchy_using_perfect_witness_search();
 
 // private:
-	std::vector<unsigned>forward;
-	std::vector<unsigned>backward;
+	std::vector<double>forward;
+	std::vector<double>backward;
 	const CustomizableContractionHierarchy*cch;
-	const unsigned*input_weight;
+	const double *input_weight;
 
 };
 
@@ -129,36 +133,37 @@ struct CustomizableContractionHierarchyQuery{
 	CustomizableContractionHierarchyQuery&reset();
 	CustomizableContractionHierarchyQuery&reset(const CustomizableContractionHierarchyMetric&metric);
 
-	CustomizableContractionHierarchyQuery&add_source(unsigned s, unsigned dist_to_s = 0);
-	CustomizableContractionHierarchyQuery&add_target(unsigned t, unsigned dist_to_t = 0);
+	CustomizableContractionHierarchyQuery&add_source(unsigned s, double dist_to_s = 0);
+	CustomizableContractionHierarchyQuery&add_target(unsigned t, double dist_to_t = 0);
 
 	CustomizableContractionHierarchyQuery&run();
 
 	unsigned get_used_source();
 	unsigned get_used_target();
 
-	unsigned get_distance();
+	double get_distance();
 	std::vector<unsigned> get_node_path();
 	std::vector<unsigned> get_arc_path();
+	unsigned number_of_visited_nodes();
 
 	// One-To-Many
 	CustomizableContractionHierarchyQuery& reset_source();
 	CustomizableContractionHierarchyQuery& pin_targets(const std::vector<unsigned>&);
 	CustomizableContractionHierarchyQuery& run_to_pinned_targets();
 
-	CustomizableContractionHierarchyQuery& get_distances_to_targets(unsigned*dist);
-	std::vector<unsigned> get_distances_to_targets();
+	CustomizableContractionHierarchyQuery& get_distances_to_targets(double*dist);
+	std::vector<double> get_distances_to_targets();
 
 	// Many-To-One
 	CustomizableContractionHierarchyQuery& reset_target();
 	CustomizableContractionHierarchyQuery& pin_sources(const std::vector<unsigned>&);
 	CustomizableContractionHierarchyQuery& run_to_pinned_sources();
 
-	CustomizableContractionHierarchyQuery& get_distances_to_sources(unsigned*dist);
-	std::vector<unsigned> get_distances_to_sources();
+	CustomizableContractionHierarchyQuery& get_distances_to_sources(double*dist);
+	std::vector<double> get_distances_to_sources();
 
 // private:
-	std::vector<unsigned>forward_tentative_distance, backward_tentative_distance;
+	std::vector<double>forward_tentative_distance, backward_tentative_distance;
 	std::vector<unsigned>source_node;
 	std::vector<unsigned>source_elimination_tree_end;
 	std::vector<unsigned>target_node;
@@ -169,6 +174,7 @@ struct CustomizableContractionHierarchyQuery{
 	std::vector<bool>in_forward_search_space, in_backward_search_space;
 	
 	unsigned shortest_path_meeting_node;
+	unsigned number_of_visted_nodes;
 
 	const CustomizableContractionHierarchy*cch;
 	const CustomizableContractionHierarchyMetric*metric;
