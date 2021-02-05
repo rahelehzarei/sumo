@@ -1,0 +1,21 @@
+#!/bin/bash
+for ((j = 1 ; j<=1; j =j+1 ));
+	do
+		
+		#5000
+		#../../../../SUMOProj/bin/sumo_Eichstaett_Dynamic_WPR.exe --routing-algorithm  HL -n ./Eichstaett.net.xml -r ./Eichstaett-TripsR/RoutingSim2.rou.xml --junction-taz true --device.rerouting.adaptation-interval 100   --tripinfo-output ./RoutingSimTravelTime/Eichstaett_tripinfo_HL_PG_5000_WIR100_$j.xml --vehroute-output ./RoutingSimTravelTime/Eichstaett_vehroute_HL_PG_5000_WIR100_$j.xml  --vehroute-output.cost true  --vehroute-output.route-length true  --duration-log.statistics true --xml-validation never --verbose true --device.rerouting.probability 1  --log ./RoutingSimTravelTime/Eichstaett_HL_PG_5000_WIR100_$j.txt
+		
+		 #../../../../SUMOProj/bin/sumo_Eichstaett_Dynamic_WPR.exe --routing-algorithm  HL -n ./Eichstaett.net.xml -r ./Eichstaett-TripsR/RoutingSim2.rou.xml --junction-taz true --device.rerouting.adaptation-interval 200    --tripinfo-output ./RoutingSimTravelTime/Eichstaett_tripinfo_HL_PG_5000_WIR200_$j.xml --vehroute-output ./RoutingSimTravelTime/Eichstaett_vehroute_HL_PG_5000_WIR200_$j.xml  --vehroute-output.cost true  --vehroute-output.route-length true  --duration-log.statistics true --xml-validation never --verbose true --device.rerouting.probability 1  --log ./RoutingSimTravelTime/Eichstaett_HL_PG_5000_WIR200_$j.txt
+		
+		  ../../../../SUMOProj/bin/sumo_Eichstaett_Dynamic_WPR.exe --routing-algorithm  HL -n ./Eichstaett.net.xml -r ./Eichstaett-TripsR/RoutingSim2.rou.xml --junction-taz true --device.rerouting.adaptation-interval 500 --vehroute-output.cost true  --vehroute-output.route-length true  --duration-log.statistics true --xml-validation never --verbose true --device.rerouting.probability 1 --device.rerouting.output Eichstaett_HL_PG_500_Weight.txt
+		
+		#10000
+		 #../../../../SUMOProj/bin/sumo_Eichstaett_Dynamic_WPR.exe --routing-algorithm  HL -n ./Eichstaett.net.xml -r ./Eichstaett-TripsR/RoutingSim3.rou.xml --junction-taz true --device.rerouting.adaptation-interval 100   --tripinfo-output ./RoutingSimTravelTime/Eichstaett_tripinfo_HL_PG_10000_WIR100_$j.xml --vehroute-output ./RoutingSimTravelTime/Eichstaett_vehroute_HL_PG_10000_WIR100_$j.xml  --vehroute-output.cost true  --vehroute-output.route-length true  --duration-log.statistics true --xml-validation never --verbose true --device.rerouting.probability 1  --log ./RoutingSimTravelTime/Eichstaett_HL_PG_10000_WIR100_$j.txt
+		
+		 #../../../../SUMOProj/bin/sumo_Eichstaett_Dynamic_WPR.exe --routing-algorithm  HL -n ./Eichstaett.net.xml -r ./Eichstaett-TripsR/RoutingSim3.rou.xml --junction-taz true --device.rerouting.adaptation-interval 200  --tripinfo-output ./RoutingSimTravelTime/Eichstaett_tripinfo_HL_PG_10000_WIR200_$j.xml --vehroute-output ./RoutingSimTravelTime/Eichstaett_vehroute_HL_PG_10000_WIR200_$j.xml  --vehroute-output.cost true  --vehroute-output.route-length true  --duration-log.statistics true --xml-validation never --verbose true --device.rerouting.probability 1  --log ./RoutingSimTravelTime/Eichstaett_HL_PG_10000_WIR200_$j.txt
+		
+		# ../../../../SUMOProj/bin/sumo_Eichstaett_Dynamic_WPR.exe --routing-algorithm  HL -n ./Eichstaett.net.xml -r ./Eichstaett-TripsR/RoutingSim3.rou.xml --junction-taz true --device.rerouting.adaptation-interval 500  --tripinfo-output ./RoutingSimTravelTime/Eichstaett_tripinfo_HL_PG_10000_WIR500_$j.xml --vehroute-output ./RoutingSimTravelTime/Eichstaett_vehroute_HL_PG_10000_WIR500_$j.xml  --vehroute-output.cost true  --vehroute-output.route-length true  --duration-log.statistics true --xml-validation never --verbose true --device.rerouting.probability 1  --log ./RoutingSimTravelTime/Eichstaett_HL_PG_10000_WIR500_$j.txt
+		 
+
+
+done
